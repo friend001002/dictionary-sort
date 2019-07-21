@@ -19,7 +19,7 @@ Dictionary_sort<T>::Dictionary_sort(vector<T>& data, bool construct_map)
 }
 
 template<class T>
-bool  Dictionary_sort<T>::Sort(vector<T>& res)
+bool Dictionary_sort<T>::Sort(vector<T>& res)
 {
   if (0 == data_.size())
   {
@@ -50,8 +50,38 @@ bool  Dictionary_sort<T>::Sort(vector<T>& res)
 }
 
 template<class T>
+vector<T> Dictionary_sort<T>::Sort() noexcept(false)
+{
+  if (0 == data_.size())
+  {
+    cerr << "No objects in data_\n";
+    //return false;
+    throw Dictionary_sort_ex("No objects in data_");
+  }
+
+  if (false == map_constructed_)
+  {
+    this->Construct_map();
+  }
+
+  vector<T> res;
+
+  for (pair<T, size_t> t : map_)
+  {
+    for (size_t i{}; i < t.second; ++i)
+    {
+      res.push_back(t.first);
+    }
+  }
+
+  return res;
+}
+
+template<class T>
 Dictionary_sort<T>::~Dictionary_sort()
 {
+  cout << "~Dictionary_sort\n";
+
   data_.clear();
   data_.shrink_to_fit();
 
@@ -84,27 +114,80 @@ void Dictionary_sort<T>::Construct_map()
 
 int main()
 {
-  vector<int> in{ 1, 2, 4, 8, 0, 6, 5, 4, 3, 3, 1, 0 };
+  cout << "Error codes:\n";
 
-  Dictionary_sort<int> ds(in, true);
-
-  vector<int> res;
-
-  bool succ = ds.Sort(res);
-
-  if (succ)
+  do
   {
-    for (int i : res)
+    vector<int> in{ 1, 2, 4, 8, 0, 6, 5, 4, 3, 3, 1, 0 };
+
+    Dictionary_sort<int> ds(in, true);
+
+    vector<int> res;
+
+    bool succ = ds.Sort(res);
+
+    cout << "Orig:   ";
+
+    for (int i : in)
     {
       cout << i << ' ';
     }
 
     cout << endl;
+
+    cout << "Sorted: ";
+
+    if (succ)
+    {
+      for (int i : res)
+      {
+        cout << i << ' ';
+      }
+
+      cout << endl;
+    }
+    else
+    {
+      cerr << "Failure\n";
+    }
   }
-  else
+  while (false);
+
+  cout << "Exceptions:\n";
+
+  do
   {
-    cerr << "Failure\n";
-  }
+    vector<int> in{ 1, 2, 4, 8, 0, 6, 5, 4, 3, 3, 1, 0 };
+
+    Dictionary_sort<int> ds(in, true);
+
+    cout << "Orig:   ";
+
+    for (int i : in)
+    {
+      cout << i << ' ';
+    }
+
+    cout << endl;
+
+    cout << "Sorted: ";
+
+    try
+    {
+      vector<int> res = ds.Sort();
+
+      for (int i : res)
+      {
+        cout << i << ' ';
+      }
+
+      cout << endl;
+    }
+    catch (Dictionary_sort_ex& ex)
+    {
+      cerr << "Exception: " << ex.what() << endl;
+    }
+  } while (false);
 
   cin.get();
 
